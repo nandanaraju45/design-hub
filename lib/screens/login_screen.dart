@@ -3,6 +3,8 @@ import 'package:design_hub/widgets/customer_or_designer_popup.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
