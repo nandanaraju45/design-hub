@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               // App title or logo
               Text(
-                'Welcome Back',
+                'Welcome',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
