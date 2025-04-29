@@ -36,6 +36,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
   cloud_firestore: ^5.6.6
+  font_awesome_flutter: ^10.8.0
+  carousel_slider: ^5.0.0
+  shimmer: ^3.0.0
+  skeletonizer: ^1.4.3
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

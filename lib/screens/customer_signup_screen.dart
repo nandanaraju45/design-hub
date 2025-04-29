@@ -1,4 +1,6 @@
 import 'package:design_hub/helpers/validators.dart';
+import 'package:design_hub/routes/routes.dart';
+import 'package:design_hub/screens/customer_home_screen.dart';
 import 'package:design_hub/widgets/form_text_field.dart';
 import 'package:flutter/material.dart';
 
@@ -137,7 +139,7 @@ class _CustomerSignupScreenState extends State<CustomerSignupScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          // Sign up logic here
+                          Navigator.pushAndRemoveUntil(context, MyRoutes.createSlideFadeRoute(CustomerHomeScreen()), (route)=>false);
                         }
                       },
                       style: ElevatedButton.styleFrom(

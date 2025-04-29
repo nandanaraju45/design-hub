@@ -1,3 +1,4 @@
+import 'package:design_hub/routes/routes.dart';
 import 'package:design_hub/screens/customer_signup_screen.dart';
 import 'package:design_hub/screens/designer_signup_screen.dart';
 import 'package:flutter/material.dart';
@@ -57,15 +58,11 @@ class CustomerOrDesignerPopup {
 
             if (selectedValue == 'customer') {
               Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => CustomerSignupScreen(),
-                ),
+                MyRoutes.createSlideFadeRoute(CustomerSignupScreen())
               );
             } else if (selectedValue == 'designer') {
               Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => DesignerSignupScreen(),
-                ),
+                MyRoutes.createSlideFadeRoute(DesignerSignupScreen())
               );
             }
           },
