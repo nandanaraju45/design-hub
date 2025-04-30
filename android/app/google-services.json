@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "613975336550",
+    "project_id": "design-hub-ccdfc",
+    "storage_bucket": "design-hub-ccdfc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:613975336550:android:2dc72129d55c32caf3efa7",
+        "android_client_info": {
+          "package_name": "com.example.design_hub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC39dAxBCQW7UTM3oW5V1JRR8t80sPn4oA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

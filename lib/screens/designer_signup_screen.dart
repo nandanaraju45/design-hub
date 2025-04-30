@@ -1,5 +1,19 @@
+import 'dart:io';
+
+import 'package:design_hub/cloudinary/cloudinary_service.dart';
+import 'package:design_hub/firebase/authentication/authentication.dart';
+import 'package:design_hub/firebase/firestore/designer_service.dart';
+import 'package:design_hub/firebase/firestore/user_service.dart';
+import 'package:design_hub/helpers/image_picker.dart';
 import 'package:design_hub/helpers/validators.dart';
+import 'package:design_hub/models/design_model.dart';
+import 'package:design_hub/models/designer_detailes_model.dart';
+import 'package:design_hub/models/user_model.dart';
+import 'package:design_hub/screens/customer_home_screen.dart';
+import 'package:design_hub/screens/designer_home.dart';
+import 'package:design_hub/screens/quiz_screen.dart';
 import 'package:design_hub/widgets/form_text_field.dart';
+import 'package:design_hub/widgets/snackbar.dart';
 import 'package:flutter/material.dart';
 
 class DesignerSignupScreen extends StatefulWidget {
@@ -17,9 +31,112 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController qualificationController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   final validators = Validators();
+  final cloudinaryService = CloudinaryService();
+  final authentication = Authentication();
+  final userService = UserService();
+  final imagepicker = ImagePickerService();
+  final designerService = DesignerService();
+
+  DesignCategory? _selectedCategory; // 🔹 New dropdown value holder
+  File? selectedImage;
+  bool isLoading = false;
+
+  void signupDesigner() async {
+    if (_selectedCategory == null) {
+      mySnackBar(context, 'Please select a category');
+      return;
+    }
+
+    if (selectedImage != null) {
+      setState(() {
+        isLoading = true;
+      });
+
+      final url = await cloudinaryService.uploadImageToCloudinary(
+          imageFile: selectedImage!, folderName: 'profileImages');
+
+      if (url == null) {
+        setState(() => isLoading = false);
+        mySnackBar(context, 'Image upload failed');
+        return;
+      }
+
+      final name = nameController.text;
+      final email = emailController.text;
+      final phone = phoneController.text;
+      final password = passwordController.text;
+      final qualification = qualificationController.text;
+
+      final uid = await authentication.signUp(email, password);
+
+      final user = UserModel(
+          id: uid,
+          name: name,
+          email: email,
+          phone: phone,
+          userType: UserType.designer,
+          profileImageUrl: url);
+
+      final designerDetails = DesignerDetailesModel(
+        uid: uid,
+        qualification: qualification,
+        category: _selectedCategory!,
+        isApproved: false,
+        isQuizPassed: false,
+      );
+
+      await userService.saveUser(user);
+      await designerService.saveDesignerDetails(designerDetails);
+
+      setState(() {
+        isLoading = false;
+      });
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                QuizScreen(designerDetailes: designerDetails, user: user)),
+        (route) => false,
+      );
+    } else {
+      mySnackBar(context, 'Please choose an image');
+    }
+  }
+
+  void pickImage() async {
+    final image = await imagepicker.pickImageFromGallery();
+    if (image != null) {
+      setState(() {
+        selectedImage = image;
+      });
+    }
+  }
+
+  String _categoryToLabel(DesignCategory category) {
+    switch (category) {
+      case DesignCategory.jwellery:
+        return 'Jewellery';
+      case DesignCategory.furniture:
+        return 'Furniture';
+      case DesignCategory.interiorDesign:
+        return 'Interior Design';
+      case DesignCategory.dressDesign:
+        return 'Dress Design';
+      case DesignCategory.homeDecor:
+        return 'Home Decor';
+      case DesignCategory.pottery:
+        return 'Pottery';
+      case DesignCategory.handCraft:
+        return 'Hand Craft';
+      case DesignCategory.mehendi:
+        return 'Mehendi';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +159,21 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
                     ),
                   ),
                   const SizedBox(height: 32.0),
-        
+
+                  GestureDetector(
+                    onTap: pickImage,
+                    child: CircleAvatar(
+                        backgroundColor: Colors.blue[100],
+                        radius: 50,
+                        backgroundImage: selectedImage != null
+                            ? FileImage(selectedImage!)
+                            : null,
+                        child: selectedImage == null ? Icon(Icons.add) : null),
+                  ),
+                  SizedBox(
+                    height: 16,
+                  ),
+
                   // Full Name
                   FormTextField(
                     textInputType: TextInputType.name,
@@ -57,7 +188,7 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
                     },
                   ),
                   const SizedBox(height: 16.0),
-        
+
                   // Email
                   FormTextField(
                     controller: emailController,
@@ -75,7 +206,7 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
                     },
                   ),
                   const SizedBox(height: 16.0),
-        
+
                   // Phone Number
                   FormTextField(
                     textCapitalization: TextCapitalization.none,
@@ -93,7 +224,7 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
                     },
                   ),
                   const SizedBox(height: 16.0),
-        
+
                   // Qualification
                   FormTextField(
                     textCapitalization: TextCapitalization.words,
@@ -108,7 +239,42 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
                     },
                   ),
                   const SizedBox(height: 16.0),
-        
+
+                  // 🔽 Design Category Dropdown
+                  DropdownButtonFormField<DesignCategory>(
+                    value: _selectedCategory,
+                    decoration: InputDecoration(
+                        labelText: 'Design Category',
+                        floatingLabelStyle: TextStyle(color: Colors.blue),
+                        labelStyle:
+                            TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.blue, width: 2),
+                            borderRadius: BorderRadius.circular(10))),
+                    items: DesignCategory.values.map((category) {
+                      return DropdownMenuItem(
+                        value: category,
+                        child: Text(_categoryToLabel(category)),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Please select a category';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 16.0),
+
                   // Password
                   FormTextField(
                     controller: passwordController,
@@ -127,7 +293,7 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
                     },
                   ),
                   const SizedBox(height: 16.0),
-        
+
                   // Confirm Password
                   FormTextField(
                     controller: confirmPasswordController,
@@ -146,14 +312,14 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
                     },
                   ),
                   const SizedBox(height: 24.0),
-        
+
                   // Sign Up Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          // Valid form, proceed with sign up
+                          signupDesigner();
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -164,11 +330,20 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Sign Up', style: TextStyle(fontSize: 16)),
+                      child: isLoading
+                          ? SizedBox(
+                              height: 25,
+                              width: 25,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text('Sign Up', style: TextStyle(fontSize: 16)),
                     ),
                   ),
                   const SizedBox(height: 16.0),
-        
+
                   // Already have an account?
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

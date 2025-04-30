@@ -1,6 +1,14 @@
+import 'package:design_hub/firebase/authentication/authentication.dart';
+import 'package:design_hub/firebase/firestore/designer_service.dart';
+import 'package:design_hub/firebase/firestore/user_service.dart';
 import 'package:design_hub/helpers/validators.dart';
+import 'package:design_hub/models/user_model.dart';
+import 'package:design_hub/screens/customer_home_screen.dart';
+import 'package:design_hub/screens/designer_home.dart';
+import 'package:design_hub/screens/quiz_screen.dart';
 import 'package:design_hub/widgets/customer_or_designer_popup.dart';
 import 'package:design_hub/widgets/form_text_field.dart'; // <-- Updated widget
+import 'package:design_hub/widgets/snackbar.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -14,8 +22,72 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
 
   final validators = Validators();
+  final authentication = Authentication();
+  final userService = UserService();
+  final designerService = DesignerService();
+
+  void loginUser() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final uid = await authentication.signIn(
+        emailController.text, passwordController.text);
+
+    if (uid.length < 28) {
+      mySnackBar(context, uid);
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    final user = await userService.getUserById(uid);
+
+    if (user == null) {
+      mySnackBar(context, 'An error occured');
+      await authentication.signOut();
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    if (user.userType == UserType.designer) {
+      final designerDetailes = await designerService.getDesignerDetails(uid);
+      if (designerDetailes!.isApproved) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => DesignerHome(
+                    designerDetailes: designerDetailes,
+                    user: user,
+                  )),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => QuizScreen(
+              designerDetailes: designerDetailes,
+              user: user,
+            ),
+          ),
+        );
+      }
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CustomerHomeScreen(
+                  user: user,
+                )),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +169,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // Valid form
+                        loginUser();
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -108,7 +180,16 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Login', style: TextStyle(fontSize: 16)),
+                    child: isLoading
+                          ? SizedBox(
+                            height: 25,
+                            width: 25,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : Text('Login', style: TextStyle(fontSize: 16)),
                   ),
                 ),
                 const SizedBox(height: 32.0),

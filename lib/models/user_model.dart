@@ -4,9 +4,6 @@ class UserModel {
   final String email;
   final String phone;
   final UserType userType;
-  final String? qualification;
-  bool isApproved;
-  bool isQuizPassed;
   String profileImageUrl;
 
   UserModel({
@@ -15,9 +12,6 @@ class UserModel {
     required this.email,
     required this.phone,
     required this.userType,
-    required this.qualification,
-    required this.isApproved,
-    required this.isQuizPassed,
     required this.profileImageUrl,
   });
 
@@ -29,9 +23,6 @@ class UserModel {
       'email': email,
       'phone': phone,
       'userType': userType.name, // Store enum as String
-      'qualification': qualification,
-      'isApproved': isApproved,
-      'isQuizPassed': isQuizPassed,
       'profileImageUrl': profileImageUrl,
     };
   }
@@ -47,9 +38,6 @@ class UserModel {
         (e) => e.name == map['userType'],
         orElse: () => UserType.customer, // fallback
       ),
-      qualification: map['qualification'],
-      isApproved: map['isApproved'] ?? false,
-      isQuizPassed: map['isQuizPassed'] ?? false,
       profileImageUrl: map['profileImageUrl'] ?? '',
     );
   }

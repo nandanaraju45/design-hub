@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_hub/models/design_model.dart';
+import 'package:design_hub/models/user_model.dart';
 import 'package:design_hub/widgets/design_card.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
-  const CustomerHomeScreen({super.key});
+
+  final UserModel user;
+  const CustomerHomeScreen({super.key, required this.user});
 
   @override
   State<CustomerHomeScreen> createState() => _CustomerHomeScreenState();
