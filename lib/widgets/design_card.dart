@@ -21,6 +21,7 @@ class DesignCard extends StatefulWidget {
 }
 
 class _DesignCardState extends State<DesignCard> {
+  // ignore: unused_field
   int _currentImage = 0;
 
   @override

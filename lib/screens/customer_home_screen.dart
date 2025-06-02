@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_hub/firebase/authentication/authentication.dart';
 import 'package:design_hub/models/design_model.dart';
 import 'package:design_hub/models/user_model.dart';
+import 'package:design_hub/screens/login_screen.dart';
 import 'package:design_hub/widgets/design_card.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
-
   final UserModel user;
   const CustomerHomeScreen({super.key, required this.user});
 
@@ -20,6 +20,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   String selectedCategory = 'All';
 
   bool isLoading = true;
+
+  final authService = Authentication();
 
   List<String> categories = [
     'All',
@@ -51,13 +53,23 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     ),
   );
 
+  void logOut() async {
+    await authService.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginPage(),
+      ),
+    );
+  }
+
   @override
   void initState() {
     _loadData();
     super.initState();
   }
 
-  Future<void> _loadData ()async{
+  Future<void> _loadData() async {
     await Future.delayed(Duration(seconds: 3));
     setState(() {
       isLoading = false;
@@ -118,15 +130,27 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        IconButton(
-          onPressed: () {
-            // Navigate to chats
-          },
-          icon: const Icon(
-            FontAwesomeIcons.solidComments,
-            color: Colors.white,
-            size: 26,
-          ),
+        Row(
+          children: [
+            IconButton(
+              onPressed: () {
+                // Navigate to chats
+              },
+              icon: const Icon(
+                Icons.message_rounded,
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
+            IconButton(
+              onPressed: logOut,
+              icon: const Icon(
+                Icons.logout_rounded,
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_hub/cloudinary/cloudinary_service.dart';
 import 'package:design_hub/firebase/authentication/authentication.dart';
 import 'package:design_hub/firebase/firestore/designer_service.dart';
@@ -80,14 +79,13 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
           profileImageUrl: url);
 
       final designerDetails = DesignerDetailesModel(
-        uid: uid,
-        qualification: qualification,
-        category: _selectedCategory!,
-        quizPassedAt: null,
-        isApproved: false,
-        isQuizPassed: false,
-        isDeclined: false
-      );
+          uid: uid,
+          qualification: qualification,
+          category: _selectedCategory!,
+          quizPassedAt: null,
+          isApproved: false,
+          isQuizPassed: false,
+          isDeclined: false);
 
       await userService.saveUser(user);
       await designerService.saveDesignerDetails(designerDetails);
