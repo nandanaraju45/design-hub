@@ -3,11 +3,12 @@ import 'package:design_hub/firebase/firestore/designer_service.dart';
 import 'package:design_hub/firebase/firestore/user_service.dart';
 import 'package:design_hub/helpers/validators.dart';
 import 'package:design_hub/models/user_model.dart';
+import 'package:design_hub/screens/admin_home/admin_home_screen.dart';
 import 'package:design_hub/screens/customer_home_screen.dart';
 import 'package:design_hub/screens/designer_home.dart';
 import 'package:design_hub/screens/quiz_screen.dart';
 import 'package:design_hub/widgets/customer_or_designer_popup.dart';
-import 'package:design_hub/widgets/form_text_field.dart'; 
+import 'package:design_hub/widgets/form_text_field.dart';
 import 'package:design_hub/widgets/snackbar.dart';
 import 'package:flutter/material.dart';
 
@@ -78,19 +79,27 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       }
+    } else if (user.userType == UserType.customer) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CustomerHomeScreen(
+            user: user,
+          ),
+        ),
+      );
     } else {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => CustomerHomeScreen(
-                  user: user,
-                )),
+          builder: (context) => AdminHomeScreen(),
+        ),
       );
     }
   }
 
-  void resetPassword ()async {
-     final email = emailController.text.trim();
+  void resetPassword() async {
+    final email = emailController.text.trim();
     if (email.isNotEmpty) {
       try {
         await authentication.sendPasswordResetEmail(email);
@@ -193,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     child: isLoading
-                          ? SizedBox(
+                        ? SizedBox(
                             height: 25,
                             width: 25,
                             child: CircularProgressIndicator(
@@ -201,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                               color: Colors.white,
                             ),
                           )
-                          : Text('Login', style: TextStyle(fontSize: 16)),
+                        : Text('Login', style: TextStyle(fontSize: 16)),
                   ),
                 ),
                 const SizedBox(height: 32.0),
