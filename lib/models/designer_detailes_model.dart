@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_hub/models/design_model.dart';
 
 class DesignerDetailesModel {
@@ -5,6 +6,8 @@ class DesignerDetailesModel {
   final String qualification;
   bool isApproved;
   bool isQuizPassed;
+  bool isDeclined;
+  Timestamp? quizPassedAt;
   final DesignCategory category;
 
   DesignerDetailesModel({
@@ -12,7 +15,9 @@ class DesignerDetailesModel {
     required this.qualification,
     required this.category,
     required this.isApproved,
+    required this.isDeclined,
     required this.isQuizPassed,
+    required this.quizPassedAt,
   });
 
   factory DesignerDetailesModel.fromMap(Map<String, dynamic> map) {
@@ -21,6 +26,8 @@ class DesignerDetailesModel {
       qualification: map['qualification'] ?? '',
       isApproved: map['isApproved'] ?? false,
       isQuizPassed: map['isQuizPassed'] ?? false,
+      isDeclined: map['isDeclined'] ?? false,
+      quizPassedAt: map['quizPassedAt'],
       category: DesignCategory.values.firstWhere(
         (e) => e.name == map['category'],
         orElse: () => DesignCategory.homeDecor,
@@ -34,6 +41,8 @@ class DesignerDetailesModel {
       'qualification': qualification,
       'isApproved': isApproved,
       'isQuizPassed': isQuizPassed,
+      'isDeclined': isDeclined,
+      'quizPassedAt': quizPassedAt,
       'category': category.name,
     };
   }

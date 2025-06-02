@@ -24,8 +24,7 @@ class _CustomerSignupScreenState extends State<CustomerSignupScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController confirmPasswordController =  TextEditingController();
 
   final validators = Validators();
   final imagepicker = ImagePickerService();

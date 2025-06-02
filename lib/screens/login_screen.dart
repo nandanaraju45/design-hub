@@ -7,7 +7,7 @@ import 'package:design_hub/screens/customer_home_screen.dart';
 import 'package:design_hub/screens/designer_home.dart';
 import 'package:design_hub/screens/quiz_screen.dart';
 import 'package:design_hub/widgets/customer_or_designer_popup.dart';
-import 'package:design_hub/widgets/form_text_field.dart'; // <-- Updated widget
+import 'package:design_hub/widgets/form_text_field.dart'; 
 import 'package:design_hub/widgets/snackbar.dart';
 import 'package:flutter/material.dart';
 
@@ -89,6 +89,20 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void resetPassword ()async {
+     final email = emailController.text.trim();
+    if (email.isNotEmpty) {
+      try {
+        await authentication.sendPasswordResetEmail(email);
+        mySnackBar(context, 'Password reset email sent to $email');
+      } catch (e) {
+        mySnackBar(context, 'Error : ${e.toString()}');
+      }
+    } else {
+      mySnackBar(context, 'Please fill email field');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,9 +166,7 @@ class _LoginPageState extends State<LoginPage> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {
-                      // Forgot password action
-                    },
+                    onPressed: () => resetPassword(),
                     child: const Text(
                       'Forgot Password?',
                       style: TextStyle(color: Colors.blue),

@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_hub/cloudinary/cloudinary_service.dart';
 import 'package:design_hub/firebase/authentication/authentication.dart';
 import 'package:design_hub/firebase/firestore/designer_service.dart';
@@ -9,8 +9,6 @@ import 'package:design_hub/helpers/validators.dart';
 import 'package:design_hub/models/design_model.dart';
 import 'package:design_hub/models/designer_detailes_model.dart';
 import 'package:design_hub/models/user_model.dart';
-import 'package:design_hub/screens/customer_home_screen.dart';
-import 'package:design_hub/screens/designer_home.dart';
 import 'package:design_hub/screens/quiz_screen.dart';
 import 'package:design_hub/widgets/form_text_field.dart';
 import 'package:design_hub/widgets/snackbar.dart';
@@ -85,8 +83,10 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
         uid: uid,
         qualification: qualification,
         category: _selectedCategory!,
+        quizPassedAt: null,
         isApproved: false,
         isQuizPassed: false,
+        isDeclined: false
       );
 
       await userService.saveUser(user);

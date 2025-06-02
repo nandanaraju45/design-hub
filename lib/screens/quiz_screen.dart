@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_hub/firebase/firestore/designer_service.dart';
 import 'package:design_hub/firebase/firestore/quiz_service.dart';
 import 'package:design_hub/models/designer_detailes_model.dart';
@@ -77,6 +78,7 @@ class _QuizScreenState extends State<QuizScreen> {
     if (_passed) {
       DesignerDetailesModel updatedDesignDetail = widget.designerDetailes;
       updatedDesignDetail.isQuizPassed = true;
+      updatedDesignDetail.quizPassedAt = Timestamp.now();
       await designerService.saveDesignerDetails(updatedDesignDetail);
     }
   }

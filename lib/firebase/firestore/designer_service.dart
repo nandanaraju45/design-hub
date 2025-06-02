@@ -21,4 +21,18 @@ class DesignerService {
       return null;
     }
   }
+
+  Stream<List<DesignerDetailesModel>> getPendingApprovedDesigners() {
+    return FirebaseFirestore.instance
+        .collection('designerDetails')
+        .where('isQuizPassed', isEqualTo: true)
+        .where('isApproved', isEqualTo: false)
+        .where('isDeclined', isEqualTo: false)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return DesignerDetailesModel.fromMap(doc.data());
+      }).toList();
+    });
+  }
 }

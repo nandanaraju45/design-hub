@@ -6,7 +6,8 @@ class Authentication {
   // Sign up method
   Future<String> signUp(String email, String password) async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -68,5 +69,15 @@ class Authentication {
   // Get current user's UID
   String? getCurrentUserUid() {
     return _auth.currentUser?.uid;
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      print('Password reset email sent.');
+    } on FirebaseAuthException catch (e) {
+      print('Failed to send password reset email: ${e.message}');
+      rethrow; // Optional: rethrow for UI to handle
+    }
   }
 }

@@ -1,0 +1,2 @@
+D:/design hub/design-hub/android/app/.cxx/RelWithDebInfo/25656e1q/x86_64/CMakeFiles/edit_cache.dir
+D:/design hub/design-hub/android/app/.cxx/RelWithDebInfo/25656e1q/x86_64/CMakeFiles/rebuild_cache.dir
