@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_hub/firebase/authentication/authentication.dart';
 import 'package:design_hub/models/design_model.dart';
 import 'package:design_hub/models/user_model.dart';
+import 'package:design_hub/routes/routes.dart';
+import 'package:design_hub/screens/design_details_screen.dart';
 import 'package:design_hub/screens/login_screen.dart';
 import 'package:design_hub/widgets/design_card.dart';
 import 'package:flutter/material.dart';
@@ -232,9 +234,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             return DesignCard(
               design: design,
               isLiked: false,
-              onLikePressed: () {
-                // Handle Like
+              onPressed: () {
+                Navigator.push(context,
+                    MyRoutes.createSlideFadeRoute(DesignDetailsScreen()));
               },
+              onLikePressed: () {},
             );
           },
         ),

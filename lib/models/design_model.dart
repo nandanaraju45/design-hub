@@ -55,7 +55,7 @@ class DesignModel {
 
 enum DesignCategory {
   jwellery,
-  furniture,
+  furnitureDesign,
   interiorDesign,
   dressDesign,
   homeDecor,

@@ -62,14 +62,17 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         selectedItemColor: Colors.blue,
         items: [
           BottomNavigationBarItem(
-              icon: Icon(Icons.person_add_alt_1_rounded), label: 'Requests'),
+            icon: Icon(Icons.person_add_alt_1_rounded),
+            label: 'Requests',
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.brush_outlined), label: 'Designs'),
+            icon: Icon(Icons.brush_outlined),
+            label: 'Designs',
+          ),
           BottomNavigationBarItem(
-              icon: Icon(
-                Icons.report_problem_rounded,
-              ),
-              label: 'Complaints')
+            icon: Icon(Icons.report_problem_rounded),
+            label: 'Complaints',
+          )
         ],
       ),
       body: pages[selectedIndex],

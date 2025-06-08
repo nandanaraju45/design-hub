@@ -119,7 +119,7 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
     switch (category) {
       case DesignCategory.jwellery:
         return 'Jewellery';
-      case DesignCategory.furniture:
+      case DesignCategory.furnitureDesign:
         return 'Furniture';
       case DesignCategory.interiorDesign:
         return 'Interior Design';
