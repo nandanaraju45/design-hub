@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(
               builder: (context) => DesignerHome(
-                    designerDetailes: designerDetailes,
+                    designerDetails: designerDetailes,
                     user: user,
                   )),
         );
