@@ -15,8 +15,32 @@ class _DesignerHomeState extends State<DesignerHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text('Designer Home'),
+      body: ListView(
+        children: [
+          _designerHomeHeader()
+        ],
+      )
+    );
+  }
+
+  Widget _designerHomeHeader(){
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 60,horizontal: 16,),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 60,
+            backgroundImage: NetworkImage(widget.user.profileImageUrl)
+          ),
+          SizedBox(width: 20,),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.user.name,style: TextStyle(fontSize: 22),),
+              Text(widget.user.email)
+            ],
+          )
+        ],
       ),
     );
   }

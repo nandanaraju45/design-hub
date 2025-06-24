@@ -1,0 +1,1 @@
+/home/user/flutter sample/miniproject/design_hub/build/app/intermediates/cxx/Debug/2s34d713/obj/arm64-v8a

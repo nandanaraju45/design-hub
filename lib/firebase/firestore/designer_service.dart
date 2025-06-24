@@ -24,7 +24,7 @@ class DesignerService {
 
   Stream<List<DesignerDetailesModel>> getPendingApprovedDesigners() {
     return FirebaseFirestore.instance
-        .collection('designerDetails')
+        .collection('designer_details')
         .where('isQuizPassed', isEqualTo: true)
         .where('isApproved', isEqualTo: false)
         .where('isDeclined', isEqualTo: false)
