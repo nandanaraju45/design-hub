@@ -112,10 +112,10 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
   }
 
   void pickImage() async {
-    final image = await imagepicker.pickImageFromGallery();
+    final image = await imagepicker.pickImages(useGallery: true);
     if (image != null) {
       setState(() {
-        selectedImage = image;
+        selectedImage = image[0];
       });
     }
   }
