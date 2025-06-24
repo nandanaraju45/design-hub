@@ -14,9 +14,18 @@ class RequestsPage extends StatefulWidget {
 }
 
 class _RequestsPageState extends State<RequestsPage> {
-
   final userService = UserService();
   final designerService = DesignerService();
+
+  void acceptRequest(DesignerDetailesModel designerDetails) async {
+    designerDetails.isApproved = true;
+    await designerService.saveDesignerDetails(designerDetails);
+  }
+
+  void declineRequest(DesignerDetailesModel designerDetails) async {
+    designerDetails.isDeclined = true;
+    await designerService.saveDesignerDetails(designerDetails);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +83,9 @@ class _RequestsPageState extends State<RequestsPage> {
                     : 'N/A';
 
                 return ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.person)),
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(user.profileImageUrl),
+                  ),
                   title: Text(user.name),
                   subtitle: Text('${user.email}\nQuiz Passed: $quizTime'),
                   isThreeLine: true,
@@ -82,15 +93,15 @@ class _RequestsPageState extends State<RequestsPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ElevatedButton(
-                        onPressed: () {
-                          // Accept logic here
-                        },
+                        onPressed: () => acceptRequest(designer),
                         child: const Text('Accept'),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.blue,
+                        ),
                       ),
                       IconButton(
-                        onPressed: () {
-                          // Decline logic here
-                        },
+                        onPressed: () => declineRequest(designer),
                         icon: const Icon(Icons.close),
                         color: Colors.red,
                       ),

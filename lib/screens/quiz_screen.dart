@@ -139,46 +139,47 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Widget _buildFooterButton() {
-  return AnimatedSwitcher(
-    duration: const Duration(milliseconds: 300),
-    child: ElevatedButton(
-      key: ValueKey(_quizCompleted && _passed),
-      onPressed: (_isLoading || (_quizCompleted && _passed))
-          ? null
-          : _quizCompleted
-              ? _loadQuestions
-              : _submitQuiz,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue,
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      child: _quizCompleted && _passed
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: ElevatedButton(
+        key: ValueKey(_quizCompleted && _passed),
+        onPressed: (_isLoading || (_quizCompleted && _passed))
+            ? null
+            : _quizCompleted
+                ? _loadQuestions
+                : _submitQuiz,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue,
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: _quizCompleted && _passed
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
                   ),
-                ),
-                SizedBox(width: 12),
-                Text(
-                  "✔ Passed",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-              ],
-            )
-          : Text(
-              _quizCompleted ? "Retry" : "Submit",
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
-    ),
-  );
-}
+                  SizedBox(width: 12),
+                  Text(
+                    "✔ Passed",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ],
+              )
+            : Text(
+                _quizCompleted ? "Retry" : "Submit",
+                style: const TextStyle(fontSize: 16, color: Colors.white),
+              ),
+      ),
+    );
+  }
 
   Widget _buildQuizSummary() {
     if (!_quizCompleted) return const SizedBox();
@@ -229,7 +230,7 @@ class _QuizScreenState extends State<QuizScreen> {
             child: Builder(
               builder: (context) {
                 if (widget.designerDetailes.isQuizPassed &&
-                    !widget.designerDetailes.isApproved) {
+                    !widget.designerDetailes.isDeclined) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -239,6 +240,23 @@ class _QuizScreenState extends State<QuizScreen> {
                         SizedBox(height: 20),
                         Text(
                           "You have passed the quiz,\nwaiting for the approval of admin.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  );
+                } else if (widget.designerDetailes.isQuizPassed &&
+                    widget.designerDetailes.isDeclined) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.error, color: Colors.red, size: 80),
+                        SizedBox(height: 20),
+                        Text(
+                          "Your request has been declined",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.w600),

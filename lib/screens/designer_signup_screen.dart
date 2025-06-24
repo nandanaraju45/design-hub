@@ -43,6 +43,7 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
   bool isLoading = false;
 
   void signupDesigner() async {
+    print('Sign up performed');
     if (_selectedCategory == null) {
       mySnackBar(context, 'Please select a category');
       return;
@@ -56,7 +57,10 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
       final url = await cloudinaryService.uploadImageToCloudinary(
           imageFile: selectedImage!, folderName: 'profileImages');
 
+      print(url);
+
       if (url == null) {
+        print('url is null');
         setState(() => isLoading = false);
         mySnackBar(context, 'Image upload failed');
         return;
@@ -69,6 +73,7 @@ class _DesignerSignupScreenState extends State<DesignerSignupScreen> {
       final qualification = qualificationController.text;
 
       final uid = await authentication.signUp(email, password);
+      print(uid);
 
       final user = UserModel(
           id: uid,
