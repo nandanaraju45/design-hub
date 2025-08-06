@@ -1,8 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_hub/firebase/authentication/authentication.dart';
+import 'package:design_hub/firebase/firestore/design_service.dart';
 import 'package:design_hub/models/design_model.dart';
 import 'package:design_hub/models/user_model.dart';
 import 'package:design_hub/routes/routes.dart';
+import 'package:design_hub/screens/chat_list_screen.dart';
 import 'package:design_hub/screens/design_details_screen.dart';
 import 'package:design_hub/screens/login_screen.dart';
 import 'package:design_hub/widgets/design_card.dart';
@@ -24,6 +25,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   bool isLoading = true;
 
   final authService = Authentication();
+  final designService = DesignService();
 
   List<String> categories = [
     'All',
@@ -37,23 +39,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     'Mehendi',
   ];
 
-  // Dummy data
-  List<DesignModel> designs = List.generate(
-    10,
-    (index) => DesignModel(
-      name: 'Beautiful Design ${index + 1}',
-      caption: 'A stunning piece perfect for your needs!',
-      images: [
-        'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
-        'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-      ],
-      designerId: 'designer_$index',
-      postedAt: Timestamp.now(),
-      likedBy: [],
-      reviewsCount: (index * 1.2) + 4,
-      category: DesignCategory.values[index % DesignCategory.values.length],
-    ),
-  );
+  List<DesignModel> _designs = [];
+  List<DesignModel> _filteredDesigns = [];
 
   void logOut() async {
     await authService.signOut();
@@ -72,10 +59,48 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 
   Future<void> _loadData() async {
-    await Future.delayed(Duration(seconds: 3));
+    final fetchedDesigns = await designService.getAllDesigns();
     setState(() {
       isLoading = false;
+      _designs = fetchedDesigns;
     });
+    _filterDesigns();
+  }
+
+  void _filterDesigns() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredDesigns = _designs.where((design) {
+        final matchesSearch = design.name.toLowerCase().contains(query) ||
+            design.caption.toLowerCase().contains(query);
+
+        final matchesCategory = selectedCategory == 'All' ||
+            _mapCategoryToDisplayName(design.category) == selectedCategory;
+
+        return matchesSearch && matchesCategory;
+      }).toList();
+    });
+  }
+
+  String _mapCategoryToDisplayName(DesignCategory category) {
+    switch (category) {
+      case DesignCategory.jwellery:
+        return 'Jewellery';
+      case DesignCategory.furnitureDesign:
+        return 'Furniture';
+      case DesignCategory.interiorDesign:
+        return 'Interior';
+      case DesignCategory.dressDesign:
+        return 'Dress';
+      case DesignCategory.homeDecor:
+        return 'Home Decor';
+      case DesignCategory.pottery:
+        return 'Pottery';
+      case DesignCategory.handCraft:
+        return 'Handcraft';
+      case DesignCategory.mehendi:
+        return 'Mehendi';
+    }
   }
 
   @override
@@ -96,8 +121,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       ),
     );
   }
-
-  // ================== SUB WIDGETS ==================
 
   Widget _buildHeader() {
     return Container(
@@ -136,7 +159,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           children: [
             IconButton(
               onPressed: () {
-                // Navigate to chats
+                Navigator.push(
+                  context,
+                  MyRoutes.createSlideFadeRoute(
+                    ChatListScreen(user: widget.user),
+                  ),
+                );
               },
               icon: const Icon(
                 Icons.message_rounded,
@@ -173,9 +201,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           icon: Icon(Icons.search, color: Colors.blue),
         ),
         onChanged: (value) {
-          setState(() {
-            // update UI if needed
-          });
+          _filterDesigns();
         },
       ),
     );
@@ -199,6 +225,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               setState(() {
                 selectedCategory = cat;
               });
+              _filterDesigns();
             },
             selectedColor: Colors.blue,
             backgroundColor: Colors.white,
@@ -222,7 +249,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: GridView.builder(
           padding: const EdgeInsets.only(top: 8, bottom: 20),
-          itemCount: designs.length,
+          itemCount: _filteredDesigns.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             mainAxisSpacing: 12,
@@ -230,15 +257,18 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             childAspectRatio: 0.68,
           ),
           itemBuilder: (context, index) {
-            final design = designs[index];
+            final design = _filteredDesigns[index];
             return DesignCard(
+              user: widget.user,
               design: design,
-              isLiked: false,
               onPressed: () {
-                Navigator.push(context,
-                    MyRoutes.createSlideFadeRoute(DesignDetailsScreen()));
+                Navigator.push(
+                  context,
+                  MyRoutes.createSlideFadeRoute(
+                    DesignDetailsScreen(user: widget.user, design: design),
+                  ),
+                );
               },
-              onLikePressed: () {},
             );
           },
         ),

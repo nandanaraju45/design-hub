@@ -1,4 +1,5 @@
 import 'package:design_hub/firebase/authentication/authentication.dart';
+import 'package:design_hub/models/user_model.dart';
 import 'package:design_hub/screens/admin_home/complaints_page.dart';
 import 'package:design_hub/screens/admin_home/designs_page.dart';
 import 'package:design_hub/screens/admin_home/requests_page.dart';
@@ -6,20 +7,17 @@ import 'package:design_hub/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class AdminHomeScreen extends StatefulWidget {
-  const AdminHomeScreen({super.key});
+  final UserModel user;
+  const AdminHomeScreen({super.key, required this.user});
 
   @override
   State<AdminHomeScreen> createState() => _AdminHomeScreenState();
 }
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
-  final pages = [
-    RequestsPage(),
-    DesignsPage(),
-    ComplaintsPage(),
-  ];
-
   static int selectedIndex = 1;
+
+  List<Widget> pages = [];
 
   final authService = Authentication();
 
@@ -31,6 +29,17 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         builder: (context) => LoginPage(),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    pages = [
+      RequestsPage(),
+      DesignsPage(user: widget.user),
+      ComplaintsPage(),
+    ];
   }
 
   @override

@@ -1,49 +1,54 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:design_hub/models/design_model.dart';
+import 'package:design_hub/firebase/authentication/authentication.dart';
+import 'package:design_hub/firebase/firestore/design_service.dart';
 import 'package:design_hub/models/designer_detailes_model.dart';
 import 'package:design_hub/models/user_model.dart';
 import 'package:design_hub/routes/routes.dart';
+import 'package:design_hub/screens/chat_list_screen.dart';
 import 'package:design_hub/screens/design_details_screen.dart';
+import 'package:design_hub/screens/login_screen.dart';
 import 'package:design_hub/screens/post_design_screen.dart';
+import 'package:design_hub/screens/report_complaint_screen.dart';
 import 'package:design_hub/widgets/design_card.dart';
 import 'package:flutter/material.dart';
 
 class DesignerHome extends StatefulWidget {
   final UserModel user;
   final DesignerDetailesModel designerDetails;
-  const DesignerHome(
-      {super.key, required this.user, required this.designerDetails});
+  const DesignerHome({
+    super.key,
+    required this.user,
+    required this.designerDetails,
+  });
 
   @override
   State<DesignerHome> createState() => _DesignerHomeState();
 }
 
 class _DesignerHomeState extends State<DesignerHome> {
-  List<DesignModel> designs = List.generate(
-    10,
-    (index) => DesignModel(
-      name: 'Beautiful Design ${index + 1}',
-      caption: 'A stunning piece perfect for your needs!',
-      images: [
-        'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
-        'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-      ],
-      designerId: 'designer_$index',
-      postedAt: Timestamp.now(),
-      likedBy: [],
-      reviewsCount: (index * 1.2) + 4,
-      category: DesignCategory.values[index % DesignCategory.values.length],
-    ),
-  );
+  void logOut() async {
+    final authService = Authentication();
+    await authService.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MyRoutes.createSlideFadeRoute(
-              PostDesignScreen(),
+              PostDesignScreen(
+                user: widget.user,
+                designerDetails: widget.designerDetails,
+              ),
             ),
           );
         },
@@ -80,22 +85,68 @@ class _DesignerHomeState extends State<DesignerHome> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.user.name,
-                style: TextStyle(fontSize: 24),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 180,
+                    child: Text(
+                      widget.user.name,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                  PopupMenuButton(
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MyRoutes.createSlideFadeRoute(
+                              ReportComplaintScreen(
+                                user: widget.user,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text('Report issue'),
+                      ),
+                    ],
+                  )
+                ],
               ),
-              Text(widget.user.email),
+              SizedBox(
+                width: 180,
+                child: Text(
+                  overflow: TextOverflow.ellipsis,
+                  widget.user.email,
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
               SizedBox(
                 height: 10,
               ),
-              ElevatedButton.icon(
-                onPressed: () {},
-                label: Text('Messages'),
-                icon: Icon(Icons.message),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                ),
+              Row(
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MyRoutes.createSlideFadeRoute(
+                          ChatListScreen(
+                            user: widget.user,
+                          ),
+                        ),
+                      );
+                    },
+                    label: Text('Messages'),
+                    icon: Icon(Icons.message),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                  //SizedBox(width: 30),
+                  IconButton(onPressed: logOut, icon: Icon(Icons.logout))
+                ],
               )
             ],
           )
@@ -105,32 +156,55 @@ class _DesignerHomeState extends State<DesignerHome> {
   }
 
   Widget _buildDesignGrid() {
+    final designService = DesignService();
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: GridView.builder(
-          padding: const EdgeInsets.only(top: 8, bottom: 20),
-          itemCount: designs.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.68,
-          ),
-          itemBuilder: (context, index) {
-            final design = designs[index];
-            return DesignCard(
-              design: design,
-              isLiked: false,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MyRoutes.createSlideFadeRoute(
-                    DesignDetailsScreen(),
-                  ),
+        child: StreamBuilder(
+          stream: designService.getDesignsByDesigner(widget.user.id),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              print('Stream error: ${snapshot.error}');
+              return const Center(child: Text('Something went wrong.'));
+            }
+
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('No designs found.'));
+            }
+
+            final designs = snapshot.data!;
+
+            return GridView.builder(
+              padding: const EdgeInsets.only(top: 8, bottom: 20),
+              itemCount: designs.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.68,
+              ),
+              itemBuilder: (context, index) {
+                final design = designs[index];
+                return DesignCard(
+                  user: widget.user,
+                  design: design,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MyRoutes.createSlideFadeRoute(
+                        DesignDetailsScreen(
+                          design: design,
+                          user: widget.user,
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
-              onLikePressed: () {},
             );
           },
         ),

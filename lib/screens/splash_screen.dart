@@ -120,7 +120,9 @@ class _SplashScreenState extends State<SplashScreen>
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => AdminHomeScreen(),
+          builder: (context) => AdminHomeScreen(
+            user: user,
+          ),
         ),
       );
     }

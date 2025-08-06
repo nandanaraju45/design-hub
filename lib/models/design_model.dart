@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DesignModel {
+  final String id;
   final String name;
   final String caption;
   final List<String> images;
@@ -11,6 +12,7 @@ class DesignModel {
   final DesignCategory category;
 
   DesignModel({
+    this.id = '', // Default empty if not provided
     required this.name,
     required this.caption,
     required this.images,
@@ -22,8 +24,9 @@ class DesignModel {
   });
 
   // From Map (for reading from Firestore)
-  factory DesignModel.fromMap(Map<String, dynamic> map) {
+  factory DesignModel.fromMap(Map<String, dynamic> map, String documentId) {
     return DesignModel(
+      id: documentId,
       name: map['name'] ?? '',
       caption: map['caption'] ?? '',
       images: List<String>.from(map['images'] ?? []),

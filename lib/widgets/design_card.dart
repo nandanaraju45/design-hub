@@ -1,4 +1,7 @@
+import 'package:design_hub/firebase/firestore/design_service.dart';
+import 'package:design_hub/firebase/firestore/user_service.dart';
 import 'package:design_hub/models/design_model.dart';
+import 'package:design_hub/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -7,15 +10,13 @@ import 'package:shimmer/shimmer.dart';
 class DesignCard extends StatefulWidget {
   final DesignModel design;
   final VoidCallback onPressed;
-  final VoidCallback onLikePressed;
-  final bool isLiked;
+  final UserModel user;
 
   const DesignCard({
     super.key,
     required this.design,
-    required this.onLikePressed,
-    required this.isLiked,
     required this.onPressed,
+    required this.user,
   });
 
   @override
@@ -25,9 +26,40 @@ class DesignCard extends StatefulWidget {
 class _DesignCardState extends State<DesignCard> {
   // ignore: unused_field
   int _currentImage = 0;
+  String? _name;
+
+  void _likePost(DesignModel design) {
+    final designService = DesignService();
+    design.likedBy.add(widget.user.id);
+    designService.addDesign(design);
+    setState(() {});
+  }
+
+  void _dislikePost(DesignModel design) {
+    final designService = DesignService();
+    design.likedBy.remove(widget.user.id);
+    designService.addDesign(design);
+    setState(() {});
+  }
+
+  void _getName() async {
+    final userService = UserService();
+    final user = await userService.getUserById(widget.design.designerId);
+    setState(() {
+      _name = user?.name;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getName();
+  }
 
   @override
   Widget build(BuildContext context) {
+    bool isLiked = widget.design.likedBy.contains(widget.user.id);
+
     return GestureDetector(
       onTap: widget.onPressed,
       child: ClipRRect(
@@ -75,13 +107,15 @@ class _DesignCardState extends State<DesignCard> {
                       right: 8,
                       top: 8,
                       child: GestureDetector(
-                        onTap: widget.onLikePressed,
+                        onTap: () {
+                          isLiked
+                              ? _dislikePost(widget.design)
+                              : _likePost(widget.design);
+                        },
                         child: CircleAvatar(
                           backgroundColor: Colors.white.withOpacity(0.8),
                           child: Icon(
-                            widget.isLiked
-                                ? Icons.favorite
-                                : Icons.favorite_border,
+                            isLiked ? Icons.favorite : Icons.favorite_border,
                             color: Colors.blue,
                             size: 20,
                           ),
@@ -139,8 +173,7 @@ class _DesignCardState extends State<DesignCard> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              widget.design
-                                  .designerId, // Replace with actual designer name if available
+                              _name ?? '',
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.black87,

@@ -92,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => AdminHomeScreen(),
+          builder: (context) => AdminHomeScreen(user: user),
         ),
       );
     }
@@ -210,7 +210,10 @@ class _LoginPageState extends State<LoginPage> {
                               color: Colors.white,
                             ),
                           )
-                        : Text('Login', style: TextStyle(fontSize: 16)),
+                        : Text(
+                            'Login',
+                            style: TextStyle(fontSize: 16),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 32.0),

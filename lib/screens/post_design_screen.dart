@@ -1,10 +1,22 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_hub/cloudinary/cloudinary_service.dart';
+import 'package:design_hub/firebase/firestore/design_service.dart';
 import 'package:design_hub/helpers/image_picker.dart';
+import 'package:design_hub/models/design_model.dart';
+import 'package:design_hub/models/designer_detailes_model.dart';
+import 'package:design_hub/models/user_model.dart';
 import 'package:design_hub/widgets/snackbar.dart';
 import 'package:flutter/material.dart';
 
 class PostDesignScreen extends StatefulWidget {
-  const PostDesignScreen({super.key});
+  final UserModel user;
+  final DesignerDetailesModel designerDetails;
+  const PostDesignScreen({
+    super.key,
+    required this.user,
+    required this.designerDetails,
+  });
 
   @override
   State<PostDesignScreen> createState() => _PostDesignScreenState();
@@ -16,6 +28,7 @@ class _PostDesignScreenState extends State<PostDesignScreen> {
   final ImagePickerService _imagePickerService = ImagePickerService();
 
   List<File> _selectedImages = [];
+  bool isLoading = false;
 
   void _selectImages(bool fromGallery) async {
     final images = await _imagePickerService.pickImages(
@@ -29,22 +42,58 @@ class _PostDesignScreenState extends State<PostDesignScreen> {
     }
   }
 
-  void _postDesign() {
+  void _postDesign() async {
     final title = _titleController.text.trim();
     final caption = _captionController.text.trim();
 
-    if (title.isEmpty || _selectedImages.isEmpty) {
-      mySnackBar(context, 'Please choose an image and add a title');
+    if (title.isEmpty || _selectedImages.isEmpty || caption.isEmpty) {
+      mySnackBar(context, 'Please add title, caption, and at least one image.');
       return;
     }
 
-    // TODO: Implement upload logic here
+    final cloudinaryService = CloudinaryService();
+    final List<String> images = [];
 
-    mySnackBar(context, 'Design posted successfully');
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      for (final image in _selectedImages) {
+        final url = await cloudinaryService.uploadImageToCloudinary(
+          imageFile: image,
+          folderName: 'posts',
+        );
+        if (url == null) throw Exception('Image upload failed');
+        images.add(url);
+      }
 
-    _titleController.clear();
-    _captionController.clear();
-    setState(() => _selectedImages.clear());
+      final design = DesignModel(
+        name: title,
+        caption: caption,
+        images: images,
+        designerId: widget.user.id,
+        postedAt: Timestamp.now(),
+        likedBy: [],
+        reviewsCount: 0,
+        category: widget.designerDetails.category,
+      );
+
+      final designService = DesignService();
+      await designService.addDesign(design);
+
+      mySnackBar(context, 'Design posted successfully');
+      _titleController.clear();
+      _captionController.clear();
+      setState(() => _selectedImages.clear());
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      mySnackBar(context, 'Error: ${e.toString()}');
+    }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -142,7 +191,7 @@ class _PostDesignScreenState extends State<PostDesignScreen> {
                     borderSide: BorderSide(color: themeColor),
                     borderRadius: BorderRadius.circular(14)),
                 prefixIcon: const Icon(Icons.description),
-                labelText: 'Caption (optional)',
+                labelText: 'Caption',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -153,11 +202,26 @@ class _PostDesignScreenState extends State<PostDesignScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _postDesign,
-                icon: const Icon(Icons.upload_rounded),
-                label: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14.0),
-                  child: Text("Post Design", style: TextStyle(fontSize: 16)),
-                ),
+                icon: !isLoading ? Icon(Icons.upload_rounded) : null,
+                label: isLoading
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: SizedBox(
+                          height: 25,
+                          width: 25,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'Post Design',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: themeColor,
                   foregroundColor: Colors.white,
