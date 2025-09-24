@@ -8,6 +8,8 @@ import 'package:design_hub/models/designer_detailes_model.dart';
 import 'package:design_hub/models/user_model.dart';
 import 'package:design_hub/widgets/snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class PostDesignScreen extends StatefulWidget {
   final UserModel user;
@@ -36,8 +38,20 @@ class _PostDesignScreenState extends State<PostDesignScreen> {
       allowMultiple: fromGallery,
     );
     if (images != null) {
+      final appDir = await getApplicationDocumentsDirectory();
+
+      // Persist files
+      final List<File> persistentFiles = [];
+
+      for (final file in images) {
+        final fileName = path.basename(file.path);
+        final newPath = path.join(appDir.path, fileName);
+        final newFile = await file.copy(newPath);
+        persistentFiles.add(newFile);
+      }
+
       setState(() {
-        _selectedImages = images;
+        _selectedImages = persistentFiles;
       });
     }
   }
@@ -76,6 +90,7 @@ class _PostDesignScreenState extends State<PostDesignScreen> {
         likedBy: [],
         reviewsCount: 0,
         category: widget.designerDetails.category,
+        isDeleted: false,
       );
 
       final designService = DesignService();

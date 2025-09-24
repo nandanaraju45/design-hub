@@ -7,6 +7,8 @@ import 'package:design_hub/helpers/image_picker.dart';
 import 'package:design_hub/models/chat_model.dart';
 import 'package:design_hub/models/message_model.dart';
 import 'package:design_hub/models/user_model.dart';
+import 'package:design_hub/routes/routes.dart';
+import 'package:design_hub/screens/design_details_screen.dart';
 import 'package:design_hub/widgets/design_card.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -220,11 +222,42 @@ class _ChatScreenState extends State<ChatScreen> {
                     );
                   } else {
                     final design = snapshot.data;
+                    if (design!.isDeleted) {
+                      return Card(
+                        margin: EdgeInsets.zero,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.error,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              Text(
+                                'This post was deleted',
+                                style: TextStyle(fontStyle: FontStyle.italic),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
                     return SizedBox(
                       height: 200,
                       child: DesignCard(
-                        design: design!,
-                        onPressed: () {},
+                        design: design,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MyRoutes.createSlideFadeRoute(
+                              DesignDetailsScreen(
+                                  design: design, user: widget.currentUser),
+                            ),
+                          );
+                        },
                         user: widget.currentUser,
                       ),
                     );

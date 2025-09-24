@@ -9,6 +9,7 @@ class DesignerDetailesModel {
   bool isDeclined;
   Timestamp? quizPassedAt;
   final DesignCategory category;
+  int failedAttempts;
 
   DesignerDetailesModel({
     required this.uid,
@@ -18,6 +19,7 @@ class DesignerDetailesModel {
     required this.isDeclined,
     required this.isQuizPassed,
     required this.quizPassedAt,
+    this.failedAttempts = 0,
   });
 
   factory DesignerDetailesModel.fromMap(Map<String, dynamic> map) {
@@ -27,6 +29,7 @@ class DesignerDetailesModel {
       isApproved: map['isApproved'] ?? false,
       isQuizPassed: map['isQuizPassed'] ?? false,
       isDeclined: map['isDeclined'] ?? false,
+      failedAttempts: map['failedAttempts'] ?? 0,
       quizPassedAt: map['quizPassedAt'],
       category: DesignCategory.values.firstWhere(
         (e) => e.name == map['category'],
@@ -44,6 +47,7 @@ class DesignerDetailesModel {
       'isDeclined': isDeclined,
       'quizPassedAt': quizPassedAt,
       'category': category.name,
+      'failedAttempts': failedAttempts
     };
   }
 }

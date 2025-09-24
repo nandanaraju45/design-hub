@@ -40,21 +40,44 @@ class _DesignerHomeState extends State<DesignerHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MyRoutes.createSlideFadeRoute(
-              PostDesignScreen(
-                user: widget.user,
-                designerDetails: widget.designerDetails,
-              ),
-            ),
-          );
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.small(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MyRoutes.createSlideFadeRoute(
+                  ReportComplaintScreen(
+                    user: widget.user,
+                  ),
+                ),
+              );
+            },
+            child: Icon(Icons.report),
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+          ),
+          SizedBox(
+            height: 8,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MyRoutes.createSlideFadeRoute(
+                  PostDesignScreen(
+                    user: widget.user,
+                    designerDetails: widget.designerDetails,
+                  ),
+                ),
+              );
+            },
+            child: Icon(Icons.add),
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -94,23 +117,6 @@ class _DesignerHomeState extends State<DesignerHome> {
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
-                  PopupMenuButton(
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MyRoutes.createSlideFadeRoute(
-                              ReportComplaintScreen(
-                                user: widget.user,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Text('Report issue'),
-                      ),
-                    ],
-                  )
                 ],
               ),
               SizedBox(

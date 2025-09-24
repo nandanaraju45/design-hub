@@ -27,6 +27,7 @@ class DesignService {
           likedBy: design.likedBy,
           reviewsCount: design.reviewsCount,
           category: design.category,
+          isDeleted: design.isDeleted,
         );
         await docRef.set(designWithId.toMap());
       }
@@ -35,10 +36,12 @@ class DesignService {
     }
   }
 
-  // Get all designs (one-time fetch)
+  // Get all designs where isDeleted is false (one-time fetch)
   Future<List<DesignModel>> getAllDesigns() async {
     try {
-      final querySnapshot = await _designsRef.get();
+      final querySnapshot =
+          await _designsRef.where('isDeleted', isEqualTo: false).get();
+
       return querySnapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         return DesignModel.fromMap(data, doc.id);
@@ -53,6 +56,7 @@ class DesignService {
     try {
       return _designsRef
           .where('designerId', isEqualTo: designerId)
+          .where('isDeleted', isEqualTo: false)
           .orderBy('postedAt', descending: true)
           .snapshots()
           .map((snapshot) => snapshot.docs.map((doc) {

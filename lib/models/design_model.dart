@@ -10,6 +10,7 @@ class DesignModel {
   double reviewsCount;
   List<String> likedBy;
   final DesignCategory category;
+  bool isDeleted;
 
   DesignModel({
     this.id = '', // Default empty if not provided
@@ -21,6 +22,7 @@ class DesignModel {
     required this.likedBy,
     required this.reviewsCount,
     required this.category,
+    required this.isDeleted,
   });
 
   // From Map (for reading from Firestore)
@@ -33,6 +35,7 @@ class DesignModel {
       designerId: map['designerId'] ?? '',
       postedAt: map['postedAt'] ?? Timestamp.now(),
       likedBy: List<String>.from(map['likedBy'] ?? []),
+      isDeleted: map['isDeleted'] ?? false,
       reviewsCount: (map['reviewsCount'] ?? 0).toDouble(),
       category: DesignCategory.values.firstWhere(
         (e) => e.name == map['category'],
@@ -52,6 +55,7 @@ class DesignModel {
       'likedBy': likedBy,
       'reviewsCount': reviewsCount,
       'category': category.name,
+      'isDeleted': isDeleted,
     };
   }
 }

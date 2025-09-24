@@ -170,33 +170,37 @@ class _DesignsPageState extends State<DesignsPage> {
   Widget _buildDesignGrid() {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: GridView.builder(
-          padding: const EdgeInsets.only(top: 8, bottom: 20),
-          itemCount: _filteredDesigns.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.68,
-          ),
-          itemBuilder: (context, index) {
-            final design = _filteredDesigns[index];
-            return DesignCard(
-              user: widget.user,
-              design: design,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MyRoutes.createSlideFadeRoute(
-                    DesignDetailsScreen(user: widget.user, design: design),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: _filteredDesigns.isNotEmpty
+              ? GridView.builder(
+                  padding: const EdgeInsets.only(top: 8, bottom: 20),
+                  itemCount: _filteredDesigns.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.68,
                   ),
-                );
-              },
-            );
-          },
-        ),
-      ),
+                  itemBuilder: (context, index) {
+                    final design = _filteredDesigns[index];
+                    return DesignCard(
+                      user: widget.user,
+                      design: design,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MyRoutes.createSlideFadeRoute(
+                            DesignDetailsScreen(
+                                user: widget.user, design: design),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                )
+              : Center(
+                  child: Text('No designs found'),
+                )),
     );
   }
 }

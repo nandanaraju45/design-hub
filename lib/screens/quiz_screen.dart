@@ -4,9 +4,9 @@ import 'package:design_hub/firebase/firestore/quiz_service.dart';
 import 'package:design_hub/models/designer_detailes_model.dart';
 import 'package:design_hub/models/quiz_model.dart';
 import 'package:design_hub/models/user_model.dart';
-import 'package:design_hub/widgets/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'dart:async';
 
 class QuizScreen extends StatefulWidget {
   final DesignerDetailesModel designerDetailes;
@@ -29,10 +29,36 @@ class _QuizScreenState extends State<QuizScreen> {
   bool _passed = false;
   int _correct = 0;
 
+  int _remainingSeconds = 180;
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
     _loadQuestions();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // ⏰ cancel timer when screen disposed
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _remainingSeconds = 180;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingSeconds == 0) {
+        timer.cancel();
+        if (!_quizCompleted) {
+          _submitQuiz(); // ⏰ auto-submit when time ends
+        }
+      } else {
+        setState(() {
+          _remainingSeconds--;
+        });
+      }
+    });
   }
 
   Future<void> _loadQuestions() async {
@@ -48,13 +74,11 @@ class _QuizScreenState extends State<QuizScreen> {
       _questions = questions;
       _isLoading = false;
     });
+    _startTimer();
   }
 
   void _submitQuiz() async {
-    if (_selectedAnswers.length < _questions.length) {
-      mySnackBar(context, 'Please answer all questions');
-      return;
-    }
+    _timer?.cancel();
 
     int correct = 0;
     for (int i = 0; i < _questions.length; i++) {
@@ -69,17 +93,18 @@ class _QuizScreenState extends State<QuizScreen> {
       _quizCompleted = true;
       _passed = passed;
       _correct = correct;
-
-      if (_passed) {
-        widget.designerDetailes.isQuizPassed = true; // ✅ update local value
-      }
     });
 
-    if (_passed) {
-      DesignerDetailesModel updatedDesignDetail = widget.designerDetailes;
-      updatedDesignDetail.isQuizPassed = true;
-      updatedDesignDetail.quizPassedAt = Timestamp.now();
-      await designerService.saveDesignerDetails(updatedDesignDetail);
+    if (passed) {
+      widget.designerDetailes.isQuizPassed = true;
+      widget.designerDetailes.quizPassedAt = Timestamp.now();
+      await designerService.saveDesignerDetails(widget.designerDetailes);
+    } else {
+      setState(() {
+        widget.designerDetailes.failedAttempts += 1;
+      });
+
+      await designerService.saveDesignerDetails(widget.designerDetailes);
     }
   }
 
@@ -139,6 +164,15 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Widget _buildFooterButton() {
+    final hasReachedLimit = widget.designerDetailes.failedAttempts >= 3;
+
+    if (hasReachedLimit) {
+      return const Text(
+        "You have reached the maximum number of attempts (3).",
+        style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+        textAlign: TextAlign.center,
+      );
+    }
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       child: ElevatedButton(
@@ -196,6 +230,12 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
       ),
     );
+  }
+
+  String _formatTime(int totalSeconds) {
+    final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
+    final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
+    return "$minutes:$seconds";
   }
 
   @override
@@ -280,6 +320,13 @@ class _QuizScreenState extends State<QuizScreen> {
                                     fontSize: 16, fontWeight: FontWeight.w500),
                               ),
                               const SizedBox(height: 12),
+                              Text(
+                                _formatTime(_remainingSeconds), // ⏰ show timer
+                                style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600),
+                              ),
                               Expanded(
                                 child: ListView.builder(
                                   itemCount: _questions.length,

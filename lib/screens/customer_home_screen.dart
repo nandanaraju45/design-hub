@@ -6,6 +6,7 @@ import 'package:design_hub/routes/routes.dart';
 import 'package:design_hub/screens/chat_list_screen.dart';
 import 'package:design_hub/screens/design_details_screen.dart';
 import 'package:design_hub/screens/login_screen.dart';
+import 'package:design_hub/screens/report_complaint_screen.dart';
 import 'package:design_hub/widgets/design_card.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -180,6 +181,21 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 size: 26,
               ),
             ),
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MyRoutes.createSlideFadeRoute(
+                    ReportComplaintScreen(user: widget.user),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.report,
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
           ],
         ),
       ],
@@ -246,33 +262,37 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   Widget _buildDesignGrid() {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: GridView.builder(
-          padding: const EdgeInsets.only(top: 8, bottom: 20),
-          itemCount: _filteredDesigns.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.68,
-          ),
-          itemBuilder: (context, index) {
-            final design = _filteredDesigns[index];
-            return DesignCard(
-              user: widget.user,
-              design: design,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MyRoutes.createSlideFadeRoute(
-                    DesignDetailsScreen(user: widget.user, design: design),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: _filteredDesigns.isNotEmpty
+              ? GridView.builder(
+                  padding: const EdgeInsets.only(top: 8, bottom: 20),
+                  itemCount: _filteredDesigns.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.68,
                   ),
-                );
-              },
-            );
-          },
-        ),
-      ),
+                  itemBuilder: (context, index) {
+                    final design = _filteredDesigns[index];
+                    return DesignCard(
+                      user: widget.user,
+                      design: design,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MyRoutes.createSlideFadeRoute(
+                            DesignDetailsScreen(
+                                user: widget.user, design: design),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                )
+              : Center(
+                  child: Text('No designs found'),
+                )),
     );
   }
 }

@@ -96,6 +96,13 @@ class _DesignDetailsScreenState extends State<DesignDetailsScreen> {
     });
   }
 
+  Future<void> _deletePost() async {
+    final design = widget.design;
+    design.isDeleted = true;
+    await _designService.addDesign(design);
+    Navigator.pop(context);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -113,7 +120,8 @@ class _DesignDetailsScreenState extends State<DesignDetailsScreen> {
             delegate: SliverChildListDelegate([
               _buildImageCarousel(),
               _buildProductInfo(),
-              widget.user.id != widget.design.designerId
+              widget.user.id != widget.design.designerId &&
+                      widget.user.userType != UserType.admin
                   ? _buildContactButtons()
                   : SizedBox(),
               _buildReviewSection(),
@@ -136,6 +144,15 @@ class _DesignDetailsScreenState extends State<DesignDetailsScreen> {
         'Design Details',
         style: TextStyle(color: Colors.white),
       ),
+      actions: [
+        if ((widget.user.userType == UserType.designer &&
+                widget.user.id == widget.design.designerId) ||
+            widget.user.userType == UserType.admin)
+          IconButton(
+            onPressed: _deletePost,
+            icon: Icon(Icons.delete),
+          )
+      ],
     );
   }
 
@@ -212,7 +229,8 @@ class _DesignDetailsScreenState extends State<DesignDetailsScreen> {
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -236,11 +254,17 @@ class _DesignDetailsScreenState extends State<DesignDetailsScreen> {
           ),
           const SizedBox(height: 10),
           if (isReviewsLoading)
-            const Center(child: CircularProgressIndicator())
-          else
-            ..._buildReviewList(_reviews),
+            const Center(
+              child: CircularProgressIndicator(),
+            )
+          else if (_reviews.isEmpty)
+            Text('No reviews yet'),
+          ..._buildReviewList(_reviews),
           const SizedBox(height: 20),
-          _buildReviewInput(),
+          widget.user.userType != UserType.admin &&
+                  widget.user.id != widget.design.designerId
+              ? _buildReviewInput()
+              : SizedBox(),
         ],
       ),
     );
